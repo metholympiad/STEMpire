@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vault Viewer Dark</title>
+<style>
+  body {
+    font-family: sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    padding-top: 50px;
+  }
+  #vault {
+    width: 400px;
+  }
+  .node {
+    padding: 10px 14px;
+    margin: 6px 0;
+    border-radius: 6px;
+    background: #1e1e1e;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+  }
+  .node:hover {
+    background: #333333;
+  }
+  .current {
+    background: #2196f3;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div id="vault"></div>
+
+<script>
+// Example vault with PDF leaf nodes
+const vault = {
+  "STEM": {
+    "Math": {
+      "Galois": {},
+      "Gauss": { },
+      "Erdos": { "TeorijaIgara.pdf": "pdf/TeorijaIgara.pdf"},
+      "Euclid": { "Inverzija.pdf": "pdf/Inverzija.pdf"}
+    },
+    "Physics": {},
+    "CS": { }
+  }
+};
+
+let path = ["STEM"];
+
+function getNode(path) {
+  let node = vault;
+  for (const p of path) node = node[p];
+  return node;
+}
+
+function render() {
+  const container = document.getElementById("vault");
+  container.innerHTML = "";
+
+  const currentName = path[path.length - 1];
+
+  // Current node (click to go back)
+  const currentDiv = document.createElement("div");
+  currentDiv.textContent = currentName;
+  currentDiv.className = "node current";
+  currentDiv.onclick = () => {
+    if (path.length > 1) {
+      path.pop();
+      render();
+    }
+  };
+  container.appendChild(currentDiv);
+
+  // Subnodes
+  const nodeObj = getNode(path);
+  for (const key in nodeObj) {
+    const div = document.createElement("div");
+    div.textContent = key;
+    div.className = "node";
+    div.onclick = () => {
+      if (typeof nodeObj[key] === "object") {
+        path.push(key);
+        render();
+      } else if (typeof nodeObj[key] === "string") {
+        // Open PDF in new tab
+        window.open(nodeObj[key], "_blank");
+      }
+    };
+    container.appendChild(div);
+  }
+}
+
+render();
+</script>
+
+</body>
+</html>
